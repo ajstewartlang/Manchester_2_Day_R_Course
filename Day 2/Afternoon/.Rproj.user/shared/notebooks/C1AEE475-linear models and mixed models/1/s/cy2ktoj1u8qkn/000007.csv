@@ -1,0 +1,4 @@
+"0","data %>%"
+"0","  filter(!is.na(Time)) %>%"
+"0","  group_by(Prime, Target) %>%"
+"0","  summarise(mean = mean(Time), sd = sd(Time))"

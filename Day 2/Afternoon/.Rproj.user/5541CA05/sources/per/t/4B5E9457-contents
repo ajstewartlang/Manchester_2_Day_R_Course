@@ -1,0 +1,21 @@
+results <- matrix(nrow=10000000, ncol=3, 1)
+
+colnames(results) <- c("20 shots", "1 goal", "winner")
+
+set.seed (1337)
+for (i in 1:10000000) {
+  temp <- rbinom(20, 1, .055)
+  results[i,1] <- sum(temp)
+}
+
+results[,3] <- results[,1] - results[,2]
+max(results[,3]) # 8
+
+sum(results[,3]<0)   /100000
+sum(results[,3]==0)  /100000
+sum(results[,3]>0)   /100000
+
+# 31978: team "1 goal" wins, 32.260%
+# 37531 draws, 37.51%
+# 30491: team "20 shots" wins, 30.23%
+

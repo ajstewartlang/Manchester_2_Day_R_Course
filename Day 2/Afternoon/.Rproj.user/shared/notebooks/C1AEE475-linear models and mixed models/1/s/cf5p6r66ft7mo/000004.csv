@@ -1,0 +1,3 @@
+"0","colnames(crime)[2] <- ""House_price"""
+"0","colnames(crime)[6] <- ""Violent_Crimes"""
+"0","head(crime)"

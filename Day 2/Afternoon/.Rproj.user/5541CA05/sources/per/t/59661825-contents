@@ -1,0 +1,333 @@
+---
+title: "Andrew's Two-Day R Course - Day Two"
+author: "Andrew Stewart"
+date: "1/2/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## The General Linear Model
+
+First we need to install the packages we need.  We're going to install the tidyverse packages as usual plus a few others. The package Hmisc allows us to use the rcorr() function for calculating Pearson's r.  We are also going to load the packages we need for mixed models later - these are lme4 for the lmer() function that we need to build our mixed models, the lmerTest package for allowing use to estimate the p-values of our parameters, and the emmeans package for pairwise comparisons.
+
+Remember, if you haven't previously installed these packages you first need to type install.packages("packagename") in the console before you can call the library() function for that package.
+
+```{r, message=FALSE}
+library(tidyverse)
+library(Hmisc)
+library(lme4)
+library(lmerTest)
+library(emmeans)
+```
+
+Import the dataset called "crime_dataset.csv" - this dataset contains population data, housing price index data and crime data for cities in the US.
+
+We can use the function head() to display the first few rows of our dataset called "crime".
+
+```{r, message=FALSE}
+crime <- read_csv("crime_dataset.csv")
+head(crime)
+```
+
+First let's do some wrangling.  There is one column that combines both City and State information.
+
+Let's separate that information out into two new columns called "City" and "State". Then have a look at what you now have. How has the output of head(crime) changed from above?
+
+```{r}
+crime <- separate(crime, 'City, State', into = c("City", "State"))
+head(crime)
+```
+
+Now let's rename the columns to change the name of the "index_nsa" column (which is column 2) to "House_price" and get rid of the space in the "Violent Crimes" heading (which is column 6).  See how the output of head(crime) has changed again?
+
+```{r}
+colnames(crime)[2] <- "House_price"
+colnames(crime)[6] <- "Violent_Crimes"
+head(crime)
+```
+
+We might first think that as population size increases, crime rate also increases.  Let's first build a scatter plot. As we have a lot of data we will make each point slighly translucent by setting the alpha parameter to .2
+
+```{r, warning=FALSE}
+ggplot(crime, aes(x = Population, y = Violent_Crimes)) + 
+  geom_point(alpha = .2) + 
+  geom_smooth(method = "lm")
+```
+
+This plot looks pretty interesting.  How about calculating Pearson's r?
+
+```{r}
+rcorr(crime$Population, crime$Violent_Crimes)
+```
+
+Look at the r and p-values - r is =.81 and p < .001. So ~64% of the variance in our Violent_Crimes variable is explained by our Population size variable.  Clearly there is a positive relationship between population size and the rate of violent crime. From the plot, we might conclude that the relationship is being overly influenced by crime in a small number of very large cities (top right of the plot above).  Let's exclude cities with populations greater than 2,000,000
+
+```{r}
+crime_filtered <- filter(crime, Population < 2000000)
+```
+
+Now let's redo the plot:
+
+```{r, warning=FALSE}
+ggplot(crime_filtered, aes(x = Population, y = Violent_Crimes)) + 
+  geom_point(alpha = .2) + 
+  geom_smooth(method = "lm")
+```
+
+And calculate Pearson's r.
+
+```{r}
+rcorr(crime_filtered$Population, crime_filtered$Violent_Crimes)
+```
+
+There is still a clear positive relationship (r=.69).  Let's build a regression model. The dataset contains a lot of data and each city appears a number of times (once each year). For regression, our observations need to be independent of each other so let's just focus on the year 2015. That way each city will just appear once.
+
+First we use the filter function to focus only on the year 2015.
+
+```{r}
+crime_filtered <- filter(crime_filtered, Year == 2015)
+```
+
+Then we build a plot. I'm using the layer geom_text() to plot the City names and set the check_overlap paramter to TRUE to ensure the labels don't overlap.
+
+```{r, warning=FALSE}
+ggplot(crime_filtered, aes(x = Population, y = Violent_Crimes, label = City)) + 
+  geom_point() + 
+  geom_text(nudge_y = 500, check_overlap = TRUE) + 
+  geom_smooth(method = "lm") + 
+  xlim(0,1800000)
+```
+
+This shows a clear positive linear relationship so let's work out Pearson's r.
+
+```{r}
+rcorr(crime_filtered$Population, crime_filtered$Violent_Crimes)
+```
+
+Imagine we are a city planner, and we want to know by how much we think violent crimes might increase as a function of population size. In other words, we want to work out how the violent crime rate is predicted by population size.
+
+We're going to build two linear models - one (model1) where we're using the mean of our outcome variable as the predictor, and a second (model2) where we are using Population size to predict the Violent Crimes outcome.
+
+```{r}
+model1 <- lm(Violent_Crimes ~ 1, data = crime_filtered)
+model2 <- lm(Violent_Crimes ~ Population, data = crime_filtered)
+```
+
+Let's check to see if our model with Population as the predictor is better than the one using just the mean.
+
+```{r}
+anova(model1, model2)
+```
+
+It is - the models differ and you'll see the residual sum of squares (or the error) is less in the second model (which has Population as the predictor). This means the deviation between our observed data and the regression line model (model2) is significantly less than the deviation between our observed data and the mean as a model of our data (model1). 
+
+We can also compare the AIC values of the two models - remember, in relative terms lower AIC values are better as they indicate less information in our data is not captured by the model.
+
+```{r}
+AIC(model1, model2)
+```
+
+So let's get the parameter estimates of model2.
+
+```{r}
+summary(model2)
+```
+
+The intercept corresponds to where our regression line intercepts the y-axis, and the Population parameter corresponds to the slope of our line. We see that for every increase in population by 1 there is an extra 0.006963 increase in violent crime. 
+
+For a city with a population of about a million, there will be about 7907 Violent Crimes. We calculate this by multiplying the estimate of our predictor (0.006963) by 1,000,000 and
+then adding the intercept (944.3).  This gives us 7907.3 crimes - which tallys with what you
+see in our regression line above. 
+
+## Linear Mixed Models
+
+We are now going to turn to mixed models.  
+
+Within R, import the dataset "data1.csv".  These data are from a reaction time experiment.  Fifty participants had to respond to a word on the screen.  Their task was to press a button on a button box only when they recognized the word (our DV is measures in milliseconds).  The words were either Rare or Common.  The design is repeated measures.  We might expect Common words to be recognized more quickly than Common words.  Run the appropriate LMM to determine whether this is indeed correct.
+
+```{r, message=FALSE}
+data <- read_csv("data1.csv")
+```
+
+First we need to make sure that our Subject, Item, and Condition columns are all factors - the first two we will use as our random effects, the third as our fixed effect:
+
+```{r}
+data$Subject <- as.factor(data$Subject)
+data$Item <- as.factor(data$Item)
+data$Condition <- as.factor(data$Condition)
+```
+
+Let's build a plot first:
+
+```{r, warning=FALSE}
+data %>%
+  ggplot(aes(x = Condition, y = RT, colour = Condition)) +
+  geom_violin() +
+  geom_jitter(alpha = .2, width = .2) +
+  guides(colour = FALSE) +
+  geom_boxplot(width = .2, colour = "black", alpha = 0) +
+  coord_flip()
+```
+
+Generate some descriptives:
+
+```{r}
+data %>% group_by(Condition) %>% 
+  filter(!is.na(RT)) %>% 
+  summarise(mean = mean(RT), sd = sd(RT))
+```
+
+Let's run a basic mixed model first:
+
+```{r}
+model1 <- lmer(RT ~ Condition + (1 + Condition | Subject) + (1 + Condition | Item), data = data, REML = TRUE )
+summary(model1)
+```
+
+We can see we have an effect of condition - the Intercept corresponds to our 'Common' condition and our ConditionRare estimate corresponds to the difference between our 'Common' and 'Rare' conditions.  In other words, our 'Rare' condition words are about 200 msec. slower to respond to. That fits with the descriptives we calculated earlier.  The estimates differ slighly from our descriptives as we have a missing data point which we can see by using the filter() function to display cases where we have missing RT data (indicated by NA).
+
+```{r}
+filter(data, is.na(RT))
+```
+
+How do the residuals look?
+
+```{r}
+qqnorm(residuals(model1))
+```
+
+OK, so these don't look too normal.  We now have a couple of options - we could log transform our DV... 
+
+```{r}
+model2 <- lmer(log(RT) ~ Condition + (1 + Condition | Subject) + (1 + Condition| Item), data = data, REML = TRUE)
+summary(model2)
+```
+
+The same finding holds - with the 'Rare' condition taking longer to read.  Interpreting the estimates is harder though as they are log transformed... Do the residuals now look normally distributed?
+
+```{r}
+qqnorm(residuals(model2))
+```
+
+This is looking better than modelling over the untransformed data. Another option would be to build a generalised linear mixed model assuming sampling from the Gamma distribution.
+
+Now we're going to import the dataset "data2.csv".  These data are from a repeated measures experiment where participants had to respond to a target word (measured by our DV which is labelled "Time").  The target word always followed a prime word.  Prime and Target are our two factors – each with two levels – Positive vs. Negative.  We are interested in whether there is a priming effect (i.e., Positive target words responded to more quickly after Positive than after Negative Primes, and Negative target words responded to more quickly after Negative than after Positive Primes).  We need to build the appropriate LMM to determine whether this is indeed correct.
+
+```{r, message=FALSE}
+data <- read_csv("data2.csv")
+```
+
+First we need to create our factors:
+
+```{r}
+data$Subject <- as.factor(data$Subject)
+data$Item <- as.factor(data$Item)
+data$Prime <- as.factor(data$Prime)
+data$Target <- as.factor(data$Target)
+```
+
+As it is a factorial experiment, we need to set up our contrast weightings for our two factors. This allows for easier intepretation of the paramester estimates - the intercept will correspond to the Grand Mean (i.e., the mean of our conditions).
+
+```{r}
+contrasts(data$Prime) <- matrix(c(.5, -.5))
+contrasts(data$Target) <- matrix(c(.5, -.5))
+```
+
+We can now check the structure of our data:
+
+```{r}
+head(data)
+```
+
+Let's visualise our data:
+
+```{r, warning=FALSE}
+data %>%
+  ggplot(aes(x = Prime:Target, y = Time, colour = Prime:Target)) +
+  geom_violin() +
+  geom_jitter(alpha = .2, width = .2) +
+  guides(colour = FALSE) +
+  geom_boxplot(width = .2, colour = "black", alpha = 0) +
+  coord_flip()         
+```
+
+Now we are going to generate some descriptives, filtering out cases where we have missing data in our dependent variable (labelled "Time").
+
+```{r}
+data %>%
+  filter(!is.na(Time)) %>%
+  group_by(Prime, Target) %>%
+  summarise(mean = mean(Time), sd = sd(Time))
+```
+
+```{r}
+data %>% filter(is.na(Time)) 
+```
+
+Note we have a little missing data (121 rows) - not a big deal, but something that you could report.
+
+We could calculate and plot the amount of missing data per participant:
+
+```{r, warnings=FALSE}
+data %>% 
+  group_by(Subject) %>% 
+  summarise(missing_count = sum(is.na(Time))) %>%
+  ggplot(aes(x = Subject, y = missing_count)) +
+  geom_col()
+```
+
+
+```{r}
+model1 <- lmer(Time ~ Prime * Target + (1 + Prime * Target | Subject) + (1 + Prime * Target | Item), data = data, REML = TRUE)
+summary(model1)
+```
+
+This suggests our model is over-parameterised - the "singular fit" message tells us we have combinations of our effects where some dimensions of the variance-covariance matrix in our model are effectively zero. For the time being though, let's stick with this model.
+
+Our interaction is significant - we now need to run pairwise comparisons to figure out what condition(s) differs from what other condition(s). We need to use the emmeans() function from the emmeans package - let's do the correction manually as only a couple of pairwise comparisons make theoretical sense.  They are Positive/Positive vs Negative/Positive, and Negative/Negative vs Positive/Negative.  These are the only pairs where we're comparing the same target to the same target under the two different levels of our prime.  So, we need to multiply by 2 the calculated p-values for these comparisons to correct for familywise error.
+
+```{r}
+emmeans (model1, pairwise ~ Prime*Target, adjust = "none")
+```
+
+What do the residuals look like?
+
+```{r}
+qqnorm(residuals(model1))
+```
+
+The above residuals don't look brilliant.  What about log transform? The most complex random effects model we can build is this one (although it looks over-parameterised): 
+
+```{r}
+model7 <- lmer(log(Time) ~ Prime * Target + (1 + Prime * Target | Subject) + (1 + Prime * Target | Item), data = data, REML = TRUE)
+summary(model7)
+```
+
+```{r}
+qqnorm(residuals(model7))
+```
+
+Those residuals look pretty nice - clearly normally distributed so we should adopt model7 as our model (but be minded by the fact we may be trying to estimate too many parameters). Let's run the pairwise comparisons using emmeans() - we need to remember to correct for the familywise error manually.
+
+```{r}
+emmeans (model7, pairwise ~ Prime*Target, adjust = "none")
+```
+
+Again we see the pairwise comparisons don't survive familywise error correction.  In this case we might start to wonder about our experimental power.  As a rule of thumb, you need around 1600 observations per condition to detect the kinds of effect sizes we're looking for:
+
+![](image.png) 
+<br>
+<br>
+Brysbaert, M. & Stevens, M. (2018). Power Analysis and Effect Size in Mixed Effects Models: A Tutorial. _Journal of Cognition, 1_, 1–20, DOI: https://doi.org/10.5334/joc.10
+
+How many observations did we have per condition?
+
+```{r}
+data %>% group_by(Prime, Target) %>% summarise(count = n())
+```
+
+We need to run a much higher powered experiment - we need to increase the number of participants, the number of trials, or both!
+

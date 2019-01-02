@@ -1,0 +1,3 @@
+"0","data$Subject <- as.factor(data$Subject)"
+"0","data$Item <- as.factor(data$Item)"
+"0","data$Condition <- as.factor(data$Condition)"

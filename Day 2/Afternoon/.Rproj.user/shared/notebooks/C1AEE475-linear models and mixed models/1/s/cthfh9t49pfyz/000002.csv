@@ -1,0 +1,10 @@
+"0","data <- read_csv(""data2.csv"")"
+"2","Parsed with column specification:
+cols(
+  Subject = col_double(),
+  Item = col_double(),
+  Time = col_double(),
+  Prime = col_character(),
+  Target = col_character()
+)
+"

@@ -1,0 +1,2 @@
+"0","crime <- read_csv(""crime_dataset.csv"")"
+"0","head(crime)"

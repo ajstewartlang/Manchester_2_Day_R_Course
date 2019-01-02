@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1544101236168.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2820182071",
+    "id" : "BFD9C9EF",
+    "lastKnownWriteTime" : 1545144074,
+    "last_content_update" : 1545144074862,
+    "path" : "~/Desktop/Air Work/DPMH R Course/Day 1/Morning/script_day1_morning.R",
+    "project_path" : "script_day1_morning.R",
+    "properties" : {
+        "cursorPosition" : "394,33",
+        "scrollLine" : "388",
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

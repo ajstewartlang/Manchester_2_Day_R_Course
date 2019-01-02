@@ -1,0 +1,3 @@
+"0","ggplot(crime_filtered, aes(x = Population, y = Violent_Crimes)) + "
+"0","  geom_point(alpha = .2) + "
+"0","  geom_smooth(method = ""lm"")"
