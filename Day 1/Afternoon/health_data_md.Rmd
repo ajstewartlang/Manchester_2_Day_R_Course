@@ -31,7 +31,6 @@ We're going to use a couple of packages in this workshop - the Tidyverse package
 ```{r, eval=FALSE}
 install.packages("tidyverse")
 install.packages("NHANES")
-
 ```
 
 You only ever have to do this installation once - unless you update R.  Packages themselves update regularly - the easiest way to check whether you're running the most up to date versions is by clicking on "Packages"" in the right hand pane - then click on "Update".  This will give you the option to update individual packages, or all of them.
@@ -206,7 +205,34 @@ NHANES_tidied %>%
   geom_boxplot() + 
   coord_flip() +
   guides(colour = FALSE) + 
-  labs(x = "Education X Working", y = "BMI", title = "Examining the effect of education level and employment \nstatus on BMI")
+  labs(x = "Education X Working", y = "BMI", 
+       title = "Examining the effect of education level and employment \nstatus on BMI")
+```
+
+As we've reorder based on the median BMI, it's a little hard to see any patterns as we have two factors involved in that reordering - Education and Work.  So let's simplify and look at Work status first (reordering on the basis of median BMI). We can see that the highest median BMI group are those looking for work (and the lowest those in work). 
+
+```{r}
+NHANES_tidied %>% 
+  filter(!is.na(Education) & !is.na(Work) & !is.na(BMI)) %>%
+  ggplot(aes(x = reorder(Work, BMI, median), y = BMI, 
+              colour = Work)) + 
+  geom_boxplot() + 
+  coord_flip() +
+  guides(colour = FALSE) + 
+  labs(x = "Working", y = "BMI", title = "Examining the effect of employment status on BMI")
+```
+
+Now let's look at Education on BMI. Now we say that the lowest median BMI group are those who are college graduates.
+
+```{r}
+NHANES_tidied %>% 
+  filter(!is.na(Education) & !is.na(Work) & !is.na(BMI)) %>%
+  ggplot(aes(x = reorder(Education, BMI, median), y = BMI, 
+              colour = Education)) + 
+  geom_boxplot() + 
+  coord_flip() +
+  guides(colour = FALSE) + 
+  labs(x = "Education", y = "BMI", title = "Examining the effect of education level on BMI")
 ```
 
 What about separate plots by race?  Let's first check how many values we have for the Race1 variable.
@@ -242,6 +268,8 @@ NHANES_tidied %>%
 
 Note that the y-axis labels have the same order for each graph - how might you replot these graphs so that the y-axes labels are reordered by descending median BMI for each race?
 
+Have a go at simplifying the code above so we're facet plotting by Race but just considering employment status.
+
 What else might influence BMI?  Instead of just looking at Race, might there be Gender differences?  Have a go yourself redoing the above but exploring the question of how Gender instead might interact with Education level and Employment status to influence BMI. What about looking at Race AND Gender together? You can do that by changing the last line of the code above to: facet_wrap(~ Race1:Gender)
 
 What else might be worth exploring in the NHANES dataset?
@@ -252,7 +280,7 @@ Finally, we're going to create some animated graphs using the new gganimate pack
 install.packages("devtools")
 library(devtools)
 
-devtools::install_github('thomasp85/gganimate')
+install_github('thomasp85/gganimate')
 library(gganimate)
 ```
 
