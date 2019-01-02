@@ -1,7 +1,9 @@
 # Manchester 2 Day R Course
 
 Above you will see folders for Day One and Day Two.  Within each of these, you'll find separate Morning and Afternoon folders.  Each Morning folder contains the slides for the seminar, and the R code and data I use in the slides.  The Afternoon folders contain the afternoon workshops (each written as an .html file - once downloaded these can be opened via your browser), and the data needed for each workshop. Additionally, you'll also find a _Cheat Sheets and Handy Guides_ folder which contains a number of helpful reference resources, and a Quick Start guide to begin working with R.
-<br>
+
+<br><br>
+
 On Day One we will cover the basics of R, data wrangling, and data visualisation. On Day Two we will focus on the linear model (ANOVA and regression) and (generalised) linear mixed models (aka mixed models, hierarchical linear models, random effects models) for the modelling of normal, non-normal, and binomial data.  Together, these two days will provide you with the skills needed to start working with R, the RStudio environment, and a variety of statistical models widely used in Psychology and other biomedical sciences.
 
 <br>
@@ -9,7 +11,7 @@ On Day One we will cover the basics of R, data wrangling, and data visualisation
 ## Online R Resources
 
 Below are some helpful R resources - it would be useful to look at the first one before the initial workshop.
-<br><br>
+<br>
 
 #### Online introductory guide to R, RStudio, and R Markdown.
 This is a very clear and focused introduction to R, RStudio, and R Markdown.  You probably want to read the first four chapters sooner rather than later...
