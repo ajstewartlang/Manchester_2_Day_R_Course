@@ -44,7 +44,6 @@ To being with, you need to select a new R Script under the File -> New File menu
 ```{r, message=FALSE, warning=FALSE}
 library(tidyverse)
 library(NHANES)
-library(gganimate)
 ```
 
 We're going to start by using the NHANES dataset. This is survey data collected by the US National Center for Health Statistics (NCHS) which has conducted a series of health and nutrition surveys since the early 1960s. Since 1999 approximately 5,000 individuals of all ages are interviewed in their homes every year and complete the health examination component of the survey. The health examination is conducted in a mobile examination centre (MEC). 
@@ -274,13 +273,13 @@ What else might influence BMI?  Instead of just looking at Race, might there be 
 
 What else might be worth exploring in the NHANES dataset?
 
-Finally, we're going to create some animated graphs using the new gganimate package. This version isn't yet on CRAN so you need to download it from GitHub using the devtools package as follows:
+Finally, we're going to create some animated graphs using the new gganimate package. This version has just appeared on CRAN so you need to download it first and then install it.
 
 ```{r, eval=FALSE}
-install.packages("devtools")
-library(devtools)
+install.packages("gganimate")
+```
 
-install_github('thomasp85/gganimate')
+```{r}
 library(gganimate)
 ```
 
@@ -312,7 +311,7 @@ NHANES_tidied %>%
   ease_aes("linear") 
 ```
 
-These graphs are great as they can be saved as animated gif files and can then used in presentations. To save the last animated plot you built, you can use the anim_save() function such as > anim_save(filename = "my_plot.gif")
+These graphs are great as they can be saved as animated gif files and  then used in presentations. To save the last animated plot you built, you can use the anim_save() function such as > anim_save(filename = "my_plot.gif")
 
 
 
