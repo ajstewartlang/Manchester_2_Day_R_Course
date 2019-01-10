@@ -653,6 +653,49 @@ ggplot(data, aes(x = Var_1, y = Var_2)) +
   theme(title = element_text(size = 15)) +
   ease_aes("linear")
 
+# Hockey game simluation ####
+library(tidyverse)
+library(gganimate)
+set.seed(1234)
+
+team_b_goals <- NULL
+
+for(i in 1:100000) {
+  score <- sum(sample(c(1, 0), size = 20, replace = TRUE, prob = c(0.055, 1-.055)))
+  team_b_goals <- c(team_b_goals, score)}
+
+team_a_goals <- rep(1, 100000)
+
+all_games <- as_tibble(cbind(team_a_goals, team_b_goals))
+
+# Calculate cumulative sum
+all_games <- all_games %>% 
+  mutate(team_a_wins = team_a_goals > team_b_goals,
+         team_b_wins = team_b_goals > team_a_goals) 
+
+all_games$game_number <- seq(1:100000)
+all_games$team_a_wins <- cumsum(all_games$team_a_wins)
+all_games$team_b_wins <- cumsum(all_games$team_b_wins)
+
+small_data <- tibble(c(all_games$team_a_wins, all_games$team_b_wins), 
+                     c(rep("Team_A", 100000), rep("Team_B", 100000)),
+                     c(seq(1:100000), seq(1:100000)))
+
+colnames(small_data) <- c("Points", "Team", "Game")
+
+small_data %>% 
+  filter(Game < 10000) %>% # remove this line to plot all 100000 games - crashes my Mac though!
+  ggplot(aes(x = Points, y = Game, group = Team, colour = Team)) +
+  geom_point() +
+  geom_line(size = 2) + 
+  coord_flip() +
+  transition_reveal(Game) +
+  shadow_mark(past = TRUE) +
+  labs(title = "Wins of Team A vs. Team B", 
+       x = "Running total of wins",
+       y = "Game number") +
+  theme(text = element_text(size = 15))
+
 # Collecting Twitter data ####
 # You will need to create a Twitter API access token to do this yourself
 # Type vignette("auth") into the console to get information abot doing this
