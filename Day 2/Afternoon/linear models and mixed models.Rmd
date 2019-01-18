@@ -15,7 +15,7 @@ First we need to install the packages we need.  We're going to install the tidyv
 
 Remember, if you haven't previously installed these packages you first need to type install.packages("packagename") in the console before you can call the library() function for that package.
 
-```{r, message=FALSE}
+```{r, message=FALSE, warning=FALSE}
 library(tidyverse)
 library(Hmisc)
 library(lme4)
@@ -146,7 +146,7 @@ see in our regression line above.
 
 We are now going to turn to mixed models.  
 
-Within R, import the dataset "data1.csv".  These data are from a reaction time experiment.  Fifty participants had to respond to a word on the screen.  Their task was to press a button on a button box only when they recognized the word (our DV is measures in milliseconds).  The words were either Rare or Common.  The design is repeated measures.  We might expect Common words to be recognized more quickly than Common words.  Run the appropriate LMM to determine whether this is indeed correct.
+Within R, import the dataset "data1.csv".  These data are from a reaction time experiment.  Fifty participants had to respond to a word on the screen - there were 28 items per participant.  Their task was to press a button on a button box only when they recognized the word (our DV is measures in milliseconds).  The words were either Rare or Common.  The design is repeated measures.  We might expect Common words to be recognized more quickly than Common words.  Run the appropriate LMM to determine whether this is indeed correct.
 
 ```{r, message=FALSE}
 data <- read_csv("data1.csv")
@@ -214,7 +214,7 @@ qqnorm(residuals(model2))
 
 This is looking better than modelling over the untransformed data. Another option would be to build a generalised linear mixed model assuming sampling from the Gamma distribution.
 
-Now we're going to import the dataset "data2.csv".  These data are from a repeated measures experiment where participants had to respond to a target word (measured by our DV which is labelled "Time").  The target word always followed a prime word.  Prime and Target are our two factors – each with two levels – Positive vs. Negative.  We are interested in whether there is a priming effect (i.e., Positive target words responded to more quickly after Positive than after Negative Primes, and Negative target words responded to more quickly after Negative than after Positive Primes).  We need to build the appropriate LMM to determine whether this is indeed correct.
+Now we're going to import the dataset "data2.csv".  These data are from a repeated measures experiment where participants had to respond to a target word (measured by our DV which is labelled "Time") each participant saw 32 experimental trials (or items).  The target word always followed a prime word.  Prime and Target are our two factors – each with two levels – Positive vs. Negative.  We are interested in whether there is a priming effect (i.e., Positive target words responded to more quickly after Positive than after Negative Primes, and Negative target words responded to more quickly after Negative than after Positive Primes).  We need to build the appropriate LMM to determine whether this is indeed correct.
 
 ```{r, message=FALSE}
 data <- read_csv("data2.csv")
@@ -285,12 +285,12 @@ model1 <- lmer(Time ~ Prime * Target + (1 + Prime * Target | Subject) + (1 + Pri
 summary(model1)
 ```
 
-This suggests our model is over-parameterised - the "singular fit" message tells us we have combinations of our effects where some dimensions of the variance-covariance matrix in our model are effectively zero. For the time being though, let's stick with this model.
+This suggests our model is over-parameterised - the "singular fit" message tells us we have combinations of our effects where some dimensions of the variance-covariance matrix in our model are effectively zero. We are tryint to fit a model more complex that the data supports. In the real world, you could resolve this by simplifying your random effects structure.  For the time being though, let's stick with this model.
 
 Our interaction is significant - we now need to run pairwise comparisons to figure out what condition(s) differs from what other condition(s). We need to use the emmeans() function from the emmeans package - let's do the correction manually as only a couple of pairwise comparisons make theoretical sense.  They are Positive/Positive vs Negative/Positive, and Negative/Negative vs Positive/Negative.  These are the only pairs where we're comparing the same target to the same target under the two different levels of our prime.  So, we need to multiply by 2 the calculated p-values for these comparisons to correct for familywise error.
 
 ```{r}
-emmeans (model1, pairwise ~ Prime*Target, adjust = "none")
+emmeans(model1, pairwise ~ Prime*Target, adjust = "none")
 ```
 
 What do the residuals look like?
@@ -310,10 +310,10 @@ summary(model7)
 qqnorm(residuals(model7))
 ```
 
-Those residuals look pretty nice - clearly normally distributed so we should adopt model7 as our model (but be minded by the fact we may be trying to estimate too many parameters). Let's run the pairwise comparisons using emmeans() - we need to remember to correct for the familywise error manually.
+Those residuals look pretty nice - clearly normally distributed so we should adopt model7 as our model (but be minded by the fact we may be trying to estimate too many parameters). Let's run the pairwise comparisons using emmeans() - we need to remember to correct for the familywise error manually. We also need to set the 'type' parameter so that our output is on our original scale rather than the log scale.
 
 ```{r}
-emmeans (model7, pairwise ~ Prime*Target, adjust = "none")
+emmeans(model7, pairwise ~ Prime*Target, adjust = "none", type = "response")
 ```
 
 Again we see the pairwise comparisons don't survive familywise error correction.  In this case we might start to wonder about our experimental power.  As a rule of thumb, you need around 1600 observations per condition to detect the kinds of effect sizes we're looking for:

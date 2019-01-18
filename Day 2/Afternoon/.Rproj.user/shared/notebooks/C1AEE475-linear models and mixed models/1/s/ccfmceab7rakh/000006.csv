@@ -1,2 +1,0 @@
-"0","crime <- separate(crime, 'City, State', into = c(""City"", ""State""))"
-"0","head(crime)"

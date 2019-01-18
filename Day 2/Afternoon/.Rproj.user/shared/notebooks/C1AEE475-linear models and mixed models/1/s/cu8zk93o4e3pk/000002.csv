@@ -1,4 +1,0 @@
-"0","data$Subject <- as.factor(data$Subject)"
-"0","data$Item <- as.factor(data$Item)"
-"0","data$Prime <- as.factor(data$Prime)"
-"0","data$Target <- as.factor(data$Target)"

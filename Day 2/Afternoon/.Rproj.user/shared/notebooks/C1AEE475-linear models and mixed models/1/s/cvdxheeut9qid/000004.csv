@@ -1,5 +1,0 @@
-"0","ggplot(crime_filtered, aes(x = Population, y = Violent_Crimes, label = City)) + "
-"0","  geom_point() + "
-"0","  geom_text(nudge_y = 500, check_overlap = TRUE) + "
-"0","  geom_smooth(method = ""lm"") + "
-"0","  xlim(0,1800000)"

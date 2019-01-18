@@ -1,3 +1,0 @@
-"0","data %>% group_by(Condition) %>% "
-"0","  filter(!is.na(RT)) %>% "
-"0","  summarise(mean = mean(RT), sd = sd(RT))"

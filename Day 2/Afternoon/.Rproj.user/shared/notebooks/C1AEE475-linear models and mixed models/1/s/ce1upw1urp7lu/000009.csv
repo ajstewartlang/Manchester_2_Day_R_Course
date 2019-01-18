@@ -1,7 +1,0 @@
-"0","data %>%"
-"0","  ggplot(aes(x = Prime:Target, y = Time, colour = Prime:Target)) +"
-"0","  geom_violin() +"
-"0","  geom_jitter(alpha = .2, width = .2) +"
-"0","  guides(colour = FALSE) +"
-"0","  geom_boxplot(width = .2, colour = ""black"", alpha = 0) +"
-"0","  coord_flip()         "

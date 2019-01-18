@@ -1,2 +1,0 @@
-"0","contrasts(data$Prime) <- matrix(c(.5, -.5))"
-"0","contrasts(data$Target) <- matrix(c(.5, -.5))"
