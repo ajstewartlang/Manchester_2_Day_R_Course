@@ -1,6 +1,6 @@
 # Manchester 2 Day R Course
 
-# _Due to the popularity of this course (we're at the maximum capacity now!), please do bring your own laptop if you can!_ 
+# _Due to the popularity of this course (we're at capacity now!), please do bring your own laptop if you can!_ 
 
 Above you will see folders for Day One and Day Two.  Within each of these, you'll find separate Morning and Afternoon folders.  Each Morning folder contains the slides for the seminar, and the R code and data I use in the slides.  The Afternoon folders contain the afternoon workshops (each written as an .html file - once downloaded these can be opened via your browser), and the data needed for each workshop. Additionally, you'll also find a _Cheat Sheets and Handy Guides_ folder which contains a number of helpful reference resources, and a Quick Start guide to begin working with R.
 <br><br>
