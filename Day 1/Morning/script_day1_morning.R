@@ -32,8 +32,8 @@ colnames(dataRT) = c("ID", "Simple_sentence", "Complex_sentence")
 dataRT_all <- inner_join(data, dataRT, by = (c("ID")))
 
 data_transformed <- mutate(dataRT_all, 
-                           log_Simple = log (dataRT_all$Simple_sentence), 
-                           log_Complex = log (dataRT$Complex_sentence))
+                           log_Simple = log(Simple_sentence), 
+                           log_Complex = log(Complex_sentence))
 
 filtered_data <- filter(data_transformed, ID != 2006)
 filtered_data
