@@ -101,7 +101,7 @@ Does BMI vary as a function of Education level? In the code below we are using t
 ```{r}
 NHANES_tidied %>% 
   group_by(Education) %>% 
-  summarise(median(BMI, na.rm = TRUE))
+  summarise(median = median(BMI, na.rm = TRUE))
 ```
 
 So it looks like those with College eduction have the lowest median BMI (ignoring the NA category which corresponds cases where we don't have Eduction level recorded).  
@@ -110,7 +110,7 @@ Let's graph it!  Note here we're filtering out cases where we don't have BMI val
 
 The line of code below starting with filter() means filter cases where Education is not missing AND BMI is not missing. This means that the NHANES_tidied data that gets passed to the ggplot() call has no missing data for the key variables we're interested in.  
 
-I then add a geom_boxplot() layer to create a boxplot for each level of our Education factor - and I'm arranging the order in which they're displayed by using the reorder() function to do the re-ordering based on the median BMI for the factor Education. 
+I then add a geom_boxplot() layer to create a boxplot for each level of our Education factor - and I'm arranging the order in which they're displayed by using the fct_reorder() function to do the re-ordering based on the median BMI for the factor Education. 
 
 The guides(colour = FALSE) function supresses displaying the colour legend - delete it and rerun the code to see what changes.
 
@@ -118,13 +118,15 @@ The guides(colour = FALSE) function supresses displaying the colour legend - del
 NHANES_tidied %>% 
   filter(!is.na(Education) & !is.na(BMI)) %>%
   group_by(Education) %>% 
-  ggplot(aes(x = reorder(Education, BMI, median), y = BMI, colour = Education)) +
+  ggplot(aes(x = fct_reorder(Education, BMI, median), y = BMI, colour = Education)) +
   geom_violin() +
   geom_jitter(alpha = .2, width = .1) +
   geom_boxplot(alpha = .5) +
   guides(colour = FALSE) + 
   labs(x = "Education Level", y = "BMI", title = "Examining the effect of education level on median BMI")
+
 ```
+
 
 We can also plot histograms of BMI separately for each Education level - we use the facet_wrap() function to do this.
 
@@ -160,7 +162,7 @@ What about whether people are working or not?
 ```{r}
 NHANES_tidied %>% 
   group_by(Work) %>% 
-  summarise(median(BMI, na.rm = TRUE))
+  summarise(median = median(BMI, na.rm = TRUE))
 ```
 
 Here, numerically at least, people who are working have the lowest median BMI.  We could now combine our two group_by() calls into one:
@@ -168,7 +170,7 @@ Here, numerically at least, people who are working have the lowest median BMI.  
 ```{r}
 NHANES_tidied %>% 
   group_by(Education, Work) %>% 
-  summarise(median(BMI, na.rm = TRUE))
+  summarise(median = median(BMI, na.rm = TRUE))
 ```
 
 This is a little hard to read so let's do a couple of things, first we're going to filter out cases of missing data indicated by NA - we need to do that both for the Education variable and for the Work variable.
@@ -177,7 +179,7 @@ This is a little hard to read so let's do a couple of things, first we're going 
 NHANES_tidied %>% 
   filter(!is.na(Education) & !is.na(Work)) %>%
   group_by(Education, Work) %>% 
-  summarise(median(BMI, na.rm = TRUE))
+  summarise(median = median(BMI, na.rm = TRUE))
 ```
 
 So now we only have levels of each of our two factors where we have data - but the order in which they're presented isn't helpful - let's order such that we go from highest median BMI to lowest - we use the arrange() function to arrange by descending median values.
@@ -194,12 +196,12 @@ So we see those with highest median BMI have Some College Education, and are loo
 
 Let's graph it!  Note here we're again filtering out cases where we don't have BMI value recorded. The line of code below starting with filter() means filter cases where Education is not missing AND Work is not missing AND BMI is not missing. This means that the NHANES_tidied data that gets passed to the ggplot() call has no missing data for any of the key variables we're interested in.  
 
-Again I am adding a geom_boxplot() layer to create a box plot for each combination of our factors Education and Work - and I'm arranging the order in which they're displayed by using the reorder() function to do the re-ordering based on the median BMI for each combination of factors.  I then use the coord_flip() function to flip the x and y-axes to make the graph more readable.
+Again I am adding a geom_boxplot() layer to create a box plot for each combination of our factors Education and Work - and I'm arranging the order in which they're displayed by using the fct_reorder() function to do the re-ordering based on the median BMI for each combination of factors.  I then use the coord_flip() function to flip the x and y-axes to make the graph more readable.
 
 ```{r}
 NHANES_tidied %>% 
   filter(!is.na(Education) & !is.na(Work) & !is.na(BMI)) %>%
-  ggplot(aes(x = reorder(Education:Work, BMI, median), y = BMI, 
+  ggplot(aes(x = fct_reorder(Education:Work, BMI, median), y = BMI, 
               colour = Education:Work)) + 
   geom_boxplot() + 
   coord_flip() +
@@ -208,12 +210,12 @@ NHANES_tidied %>%
        title = "Examining the effect of education level and employment \nstatus on BMI")
 ```
 
-As we've reorder based on the median BMI, it's a little hard to see any patterns as we have two factors involved in that reordering - Education and Work.  So let's simplify and look at Work status first (reordering on the basis of median BMI). We can see that the highest median BMI group are those looking for work (and the lowest those in work). 
+As we've reordered based on the median BMI, it's a little hard to see any patterns as we have two factors involved in that reordering - Education and Work.  So let's simplify and look at Work status first (reordering on the basis of median BMI). We can see that the highest median BMI group are those looking for work (and the lowest those in work). 
 
 ```{r}
 NHANES_tidied %>% 
   filter(!is.na(Education) & !is.na(Work) & !is.na(BMI)) %>%
-  ggplot(aes(x = reorder(Work, BMI, median), y = BMI, 
+  ggplot(aes(x = fct_reorder(Work, BMI, median), y = BMI, 
               colour = Work)) + 
   geom_boxplot() + 
   coord_flip() +
@@ -226,7 +228,7 @@ Now let's look at Education on BMI. Now we say that the lowest median BMI group 
 ```{r}
 NHANES_tidied %>% 
   filter(!is.na(Education) & !is.na(Work) & !is.na(BMI)) %>%
-  ggplot(aes(x = reorder(Education, BMI, median), y = BMI, 
+  ggplot(aes(x = fct_reorder(Education, BMI, median), y = BMI, 
               colour = Education)) + 
   geom_boxplot() + 
   coord_flip() +
@@ -245,7 +247,7 @@ OK, let's filter out the Other race category and plot BMI first as a function of
 ```{r}
 NHANES_tidied %>% 
   filter(!is.na(Education) & !is.na(Work) & !is.na(BMI) & Race1 != "Other") %>%
-  ggplot(aes(x = reorder(Race1, BMI, median), y = BMI, colour = Race1)) +
+  ggplot(aes(x = fct_reorder(Race1, BMI, median), y = BMI, colour = Race1)) +
   geom_boxplot() + 
   guides(colour = FALSE) +
   labs(x = "Race", y = "BMI", title = "Examining Race and BMI") 
@@ -283,6 +285,13 @@ install.packages("gganimate")
 library(gganimate)
 ```
 
+You might also need to install the gifski and png packages if you haven't done so:
+
+```{r, eval=FALSE}
+install.packages("gifski")
+install.packages("png")
+```
+
 First we're going to plot some histograms of BMI animated by age decade. We use the transition_states() function to define the operation of our animate with the ease_aes() function defining how we transtition from one frame to the next.
 
 ```{r}
@@ -301,7 +310,7 @@ Now we're going to plot some BMI by Education level violin and box plots animate
 NHANES_tidied %>% 
   filter(!is.na(Education) & !is.na(BMI)) %>%
   group_by(Education) %>% 
-  ggplot(aes(x = reorder(Education, BMI, median), y = BMI, colour = Education)) +
+  ggplot(aes(x = fct_reorder(Education, BMI, median), y = BMI, colour = Education)) +
   geom_violin() +
   #geom_jitter(alpha = .2, width = .1) +
   geom_boxplot(alpha = .5) +
