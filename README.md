@@ -42,4 +42,4 @@ https://peerj.com/articles/4794/
 <br>
 If you have any questions in advance of the course, feel free to drop me an email (Andrew.Stewart@manchester.ac.uk)
 
-I look forward to seeing you all on the 31st!
+I look forward to seeing you all on Day One!
